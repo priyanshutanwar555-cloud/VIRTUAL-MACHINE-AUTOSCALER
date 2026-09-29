@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VM Auto Scaling Controller - Cloud infrastructure management dashboard for monitoring, scaling, and managing virtual machine instances in real-time.">
+    <meta name="keywords" content="VM, auto scaling, cloud, infrastructure, monitoring, dashboard">
+    <title>CloudScale — VM Auto Scaling Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+                </div>
+                <span class="brand-name">CloudScale</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="instances">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+                    <span>Instances</span>
+                </a>
+                <a href="#" class="nav-item" data-section="policies">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                    <span>Policies</span>
+                </a>
+                <a href="#" class="nav-item" data-section="monitoring">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span>Monitoring</span>
+                </a>
+                <a href="#" class="nav-item" data-section="logs">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+                    <span>Activity Log</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="auto-scale-toggle">
+                    <div class="toggle-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/></svg>
+                        <span>Auto Scaling</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-autoscale" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="sidebar-status">
+                    <span class="live-dot"></span>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="main-content">
+
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Real-time cluster overview</p>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+                        <input type="text" id="searchInput" placeholder="Search instances...">
+                    </div>
+                    <div class="datetime-display" id="datetime-display"></div>
+                    <button class="icon-btn notification-btn" id="notif-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="notif-badge" id="notif-badge">0</span>
+                    </button>
+                    <div class="user-avatar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ===== DASHBOARD SECTION ===== -->
+            <section id="section-dashboard" class="section active">
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><circle cx="6" cy="6" r="1"/><circle cx="6" cy="18" r="1"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Running Instances</h3>
+                            <div class="stat-value" id="stat-instances" data-val="0">0</div>
+                            <div class="stat-trend up" id="trend-instances">—</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Avg CPU Usage</h3>
+                            <div class="stat-value" id="stat-cpu" data-val="0">0%</div>
+                            <div class="stat-trend" id="trend-cpu">—</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 19V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z"/><line x1="2" x2="22" y1="9" y2="9"/><line x1="2" x2="22" y1="15" y2="15"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Avg Memory</h3>
+                            <div class="stat-value" id="stat-mem" data-val="0">0%</div>
+                            <div class="stat-trend" id="trend-mem">—</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon orange">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Cost / Hour</h3>
+                            <div class="stat-value" id="stat-cost" data-val="0">$0.00</div>
+                            <div class="stat-trend" id="trend-cost">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <div class="glass-card chart-card">
+                        <div class="chart-header">
+                            <h3>CPU Usage</h3>
+                            <span class="chart-live-badge"><span class="live-dot"></span> Live</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="cpuChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <div class="chart-header">
+                            <h3>Memory Usage</h3>
+                            <span class="chart-live-badge"><span class="live-dot"></span> Live</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="memChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <div class="chart-header">
+                            <h3>Network I/O</h3>
+                            <span class="chart-live-badge"><span class="live-dot"></span> Live</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="netChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card chart-card">
+                        <div class="chart-header">
+                            <h3>Requests / sec</h3>
+                            <span class="chart-live-badge"><span class="live-dot"></span> Live</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="reqChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="btn btn-primary" id="btn-scale-up">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                        Scale Up
+                    </button>
+                    <button class="btn btn-outline" id="btn-scale-down">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                        Scale Down
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== INSTANCES SECTION ===== -->
+            <section id="section-instances" class="section">
+                <div class="section-header-bar">
+                    <h2>Virtual Machine Instances</h2>
+                    <button class="btn btn-primary" id="btn-add-instance">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                        Add Instance
+                    </button>
+                </div>
+                <div class="glass-card table-card">
+                    <table class="vm-table" id="vm-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>CPU</th>
+                                <th>Memory</th>
+                                <th>Region</th>
+                                <th>Uptime</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vm-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== POLICIES SECTION ===== -->
+            <section id="section-policies" class="section">
+                <div class="section-header-bar">
+                    <h2>Scaling Policies</h2>
+                </div>
+                <div class="policies-grid">
+                    <div class="glass-card config-card">
+                        <h3>Auto-Scaling Configuration</h3>
+                        <div class="form-group">
+                            <label for="slider-cpu-up">Scale-Up Threshold (CPU %)</label>
+                            <div class="slider-row">
+                                <input type="range" id="slider-cpu-up" min="50" max="100" value="80" class="range-slider">
+                                <span class="range-value" id="val-cpu-up">80%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="slider-cpu-down">Scale-Down Threshold (CPU %)</label>
+                            <div class="slider-row">
+                                <input type="range" id="slider-cpu-down" min="5" max="50" value="20" class="range-slider">
+                                <span class="range-value" id="val-cpu-down">20%</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-min-instances">Min Instances</label>
+                                <input type="number" id="input-min-instances" value="2" min="1" max="20" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-max-instances">Max Instances</label>
+                                <input type="number" id="input-max-instances" value="10" min="1" max="50" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-cooldown">Cooldown Period (seconds)</label>
+                            <input type="number" id="input-cooldown" value="15" min="5" max="600" class="form-input">
+                        </div>
+                        <button class="btn btn-primary" id="btn-save-policy">Save Configuration</button>
+                    </div>
+                    <div class="glass-card summary-card">
+                        <h3>Current Policy Summary</h3>
+                        <div class="policy-details" id="policy-summary">
+                            <div class="policy-item">
+                                <span class="policy-label">Scale Up When</span>
+                                <span class="policy-value" id="summary-up">CPU &gt; 80%</span>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-label">Scale Down When</span>
+                                <span class="policy-value" id="summary-down">CPU &lt; 20%</span>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-label">Instance Range</span>
+                                <span class="policy-value" id="summary-range">2 — 10</span>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-label">Cooldown</span>
+                                <span class="policy-value" id="summary-cooldown">15s</span>
+                            </div>
+                            <div class="policy-item">
+                                <span class="policy-label">Auto-Scaling</span>
+                                <span class="policy-value status-active" id="summary-status">Enabled</span>
+                            </div>
+                        </div>
+                        <div class="scaling-visual">
+                            <h4>Scaling Thresholds</h4>
+                            <div class="threshold-bar">
+                                <div class="threshold-zone safe" id="zone-safe"></div>
+                                <div class="threshold-zone warning" id="zone-warning"></div>
+                                <div class="threshold-marker down" id="marker-down" style="left:20%"><span>20%</span></div>
+                                <div class="threshold-marker up" id="marker-up" style="left:80%"><span>80%</span></div>
+                                <div class="threshold-pointer" id="threshold-pointer" style="left:50%"></div>
+                            </div>
+                            <div class="threshold-labels">
+                                <span>0%</span>
+                                <span>CPU Usage</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== MONITORING SECTION ===== -->
+            <section id="section-monitoring" class="section">
+                <div class="section-header-bar">
+                    <h2>Cluster Monitoring</h2>
+                </div>
+                <div class="monitoring-grid">
+                    <div class="glass-card health-card">
+                        <h3>Cluster Health</h3>
+                        <div class="health-ring" id="health-ring">
+                            <canvas id="healthCanvas" width="180" height="180"></canvas>
+                            <div class="health-center">
+                                <span class="health-pct" id="health-pct">99.9%</span>
+                                <span class="health-label">Uptime</span>
+                            </div>
+                        </div>
+                        <div class="health-status healthy" id="health-status">
+                            <span class="live-dot"></span>
+                            All Systems Operational
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h3>Resource Allocation</h3>
+                        <canvas id="allocationChart" width="300" height="200"></canvas>
+                        <div class="allocation-legend" id="allocation-legend"></div>
+                    </div>
+                    <div class="glass-card wide-chart">
+                        <div class="chart-header">
+                            <h3>CPU Usage (Extended View)</h3>
+                            <span class="chart-live-badge"><span class="live-dot"></span> Live</span>
+                        </div>
+                        <div class="chart-body large">
+                            <canvas id="cpuChartLarge"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== LOGS SECTION ===== -->
+            <section id="section-logs" class="section">
+                <div class="section-header-bar">
+                    <h2>Activity Log</h2>
+                    <div class="log-filters">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="scaling">Scaling</button>
+                        <button class="filter-btn" data-filter="info">Info</button>
+                        <button class="filter-btn" data-filter="warning">Warnings</button>
+                        <button class="filter-btn" data-filter="error">Errors</button>
+                    </div>
+                </div>
+                <div class="glass-card log-card">
+                    <div class="activity-log" id="activity-log">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
