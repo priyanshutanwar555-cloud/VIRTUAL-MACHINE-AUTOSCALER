@@ -421,8 +421,7 @@ If this project were to be extended further:
 ---
 
 ## 👨‍💻 Author
-
-**[Your Name]**
+-PRIYANSHU TANWAR
 - College Project — Cloud Computing / Web Technologies
 - Year: 2026
 
